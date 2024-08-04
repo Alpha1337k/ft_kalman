@@ -1,8 +1,10 @@
 use clap::Parser;
-use input::{read_input, write_data};
+use input::{initialize_stream, read_input, write_data};
+use solver::State;
 
 mod stream;
 mod input;
+mod solver;
 
 /// Simple program to greet a person
 #[derive(Parser, Debug)]
@@ -23,11 +25,16 @@ fn main() -> anyhow::Result<()>  {
 
 	let socket = input::create_connection(4243)?;
 
-	write_data(&socket, "READY".as_bytes())?;
+	initialize_stream(&socket)?;
+
+	let state = State::default();
 
 	loop {
-		read_input(&socket)?;
-		write_data(&socket, "0.0 0.0 0.0".as_bytes())?;
+		let items = read_input(&socket)?;
+
+		state.update_state(items);
+
+		write_data(&socket, state.get_prediction().as_bytes())?;
 	}
 
 
