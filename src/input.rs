@@ -26,7 +26,7 @@ pub fn create_connection(port: u16) -> anyhow::Result<UdpSocket> {
 
 pub fn write_data(socket: &UdpSocket, data: &[u8]) -> anyhow::Result<()> {
 
-	let res = socket.send_to(data, "localhost:4242")?;
+	let _res = socket.send_to(data, "localhost:4242")?;
 
 	// println!("BYTES SENT: {}", res);
 
@@ -40,7 +40,7 @@ pub fn initialize_stream(socket: &UdpSocket) -> anyhow::Result<()> {
 	write_data(socket, "READY".as_bytes())?;
 
 	loop {
-		let (res, source) = socket.recv_from(&mut buf)?;
+		let (_res, _source) = socket.recv_from(&mut buf)?;
 		
 		let received = String::from_utf8(buf.to_vec())?;
 
@@ -62,7 +62,7 @@ pub fn read_input(socket: &UdpSocket) -> anyhow::Result<Vec<StreamResult>> {
 	let mut idx = 0;
 
 	loop {
-		let (res, source) = socket.recv_from(&mut buf)?;
+		let (res, _source) = socket.recv_from(&mut buf)?;
 
 		let mut resized_buf = buf.to_vec();
 		resized_buf.resize(res, 0);
@@ -79,7 +79,7 @@ pub fn read_input(socket: &UdpSocket) -> anyhow::Result<Vec<StreamResult>> {
 		} else if reading[0] == "MSG_START" {
 			idx += 1;
 			continue;
-		} else if (reading[0] == "MSG_END") {
+		} else if reading[0] == "MSG_END" {
 			break;
 		}
 
