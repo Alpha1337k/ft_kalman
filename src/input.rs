@@ -72,7 +72,7 @@ pub fn read_input(socket: &UdpSocket) -> anyhow::Result<Vec<StreamResult>> {
 	
 		let reading: Vec<&str> = received.split('\n').collect();
 
-		dbg!(reading[0]);
+		// dbg!(reading[0]);
 
 		if idx == 0 && reading[0] != "MSG_START" {
 			panic!("No MSG_START_COMMAND");
@@ -85,7 +85,7 @@ pub fn read_input(socket: &UdpSocket) -> anyhow::Result<Vec<StreamResult>> {
 
 		let (timestamp, command) = reading[0].split_at(14);
 
-		println!("TS: {}, CMD: {}", timestamp, command);
+		// println!("TS: {}, CMD: {}", timestamp, command);
 
 		let result_type = match &command {
 			&"ACCELERATION" => ResultType::Acceleration,
@@ -100,7 +100,7 @@ pub fn read_input(socket: &UdpSocket) -> anyhow::Result<Vec<StreamResult>> {
 			.filter_map(|f| f.parse::<f64>().ok())
 			.collect();
 
-		dbg!(&items);
+		// dbg!(&items);
 
 		results.push(StreamResult { payload_type: result_type, payload_items: items });
 
