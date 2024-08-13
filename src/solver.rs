@@ -20,14 +20,14 @@ pub struct State {
 }
 
 impl State {
-	pub fn update_state(self, items: Vec<StreamResult>) {
+	pub fn update_state(self, items: &Vec<StreamResult>) {
 		
 		for item in items {
 			match item.payload_type {
-				ResultType::Acceleration => self.update_acceleration(item.payload_items),
-				ResultType::TruePosition => self.update_true_position(item.payload_items),
-				ResultType::Direction => self.update_direction(item.payload_items),
-				ResultType::Speed => self.update_speed(item.payload_items),
+				ResultType::Acceleration => self.update_acceleration(&item.payload_items),
+				ResultType::TruePosition => self.update_true_position(&item.payload_items),
+				ResultType::Direction => self.update_direction(&item.payload_items),
+				ResultType::Speed => self.update_speed(&item.payload_items),
 			}
 		}
 	}
@@ -36,7 +36,7 @@ impl State {
 		format!("{} {} {}", self.position.x, self.position.y, self.position.z)
 	}
 
-	fn update_acceleration(mut self, data: Vec<f64>) {
+	fn update_acceleration(mut self, data: &Vec<f64>) {
 		self.acceleration = Vec3 {
 			x: data[0],
 			y: data[1],
@@ -44,7 +44,7 @@ impl State {
 		}
 	}
 
-	fn update_true_position(mut self, data: Vec<f64>) {
+	fn update_true_position(mut self, data: &Vec<f64>) {
 		self.position = Vec3 {
 			x: data[0],
 			y: data[1],
@@ -52,7 +52,7 @@ impl State {
 		}
 	}
 
-	fn update_direction(mut self, data: Vec<f64>) {
+	fn update_direction(mut self, data: &Vec<f64>) {
 		self.direction = Vec3 {
 			x: data[0],
 			y: data[1],
@@ -60,7 +60,7 @@ impl State {
 		}
 	}
 
-	fn update_speed(mut self, data: Vec<f64>) {
+	fn update_speed(mut self, data: &Vec<f64>) {
 		self.speed = data[0];
 	}
 }

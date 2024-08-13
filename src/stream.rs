@@ -50,8 +50,8 @@ fn parse_stdout(line: &str) -> Option<Vec3> {
 	assert!(values.len() == 3);
 
 	Some(Vec3 {
-		x: -values[0],
-		y: -values[1],
+		x: values[0],
+		y: values[1],
 		z: values[2],
 	})
 }
@@ -60,10 +60,8 @@ pub fn run_stream(path: &str) -> (Receiver<Result<Vec3, String>>, Sender<String>
 	let (tx, rx) = mpsc::channel::<Result<Vec3, String>>();
 	let (kill_tx, kill_rx) = mpsc::channel::<String>();
 
-	let copy = path.to_string();
-
 	let thd = thread::spawn(move || {
-		let command = cmd!("stdbuf", "-o0", "-e0", "./imu-sensor-stream-linux", "-s", "0", "--delta")
+		let command = cmd!("stdbuf", "-o0", "-e0", "./imu-sensor-stream-linux", "-s", "0", "--delta", "--debug")
 			.stdout_capture()
 			.stderr_to_stdout();
 

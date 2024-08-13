@@ -2,7 +2,7 @@ use std::{f64, net::UdpSocket};
 
 use anyhow::Ok;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum ResultType {
 	TruePosition,
 	Speed,
