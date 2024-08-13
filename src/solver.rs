@@ -11,7 +11,7 @@ pub struct Vec3 {
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct State {
-	position: Vec3,
+	pub position: Vec3,
 	direction: Vec3,
 	// In m/s^2
 	acceleration: Vec3,

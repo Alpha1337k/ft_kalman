@@ -50,7 +50,7 @@ fn make_dataset(args: &Args, output: &String) -> anyhow::Result<()> {
 	dbg!(&output);
 
 	if (output.0 == false) {
-		println!("ft_kalman: stream exited:\n> {}", output.1.join("\n> "));
+		println!("ft_kalman: stream exited: {:?}", output.1);
 		return Err(Error::msg("Stream Exited"));
 	}
 
@@ -58,7 +58,7 @@ fn make_dataset(args: &Args, output: &String) -> anyhow::Result<()> {
 
 	let socket = input::create_connection(4243)?;
 
-	let state = State::default();
+	let mut state = State::default();
 	initialize_stream(&socket)?;
 
 	output = get_stream_output(&rx)?;
@@ -79,14 +79,26 @@ fn make_dataset(args: &Args, output: &String) -> anyhow::Result<()> {
 
 		println!("WE IN ERE");
 
-		output = get_stream_output(&rx)?;
-	
-		if (output.0 == false) {
-			println!("ft_kalman: stream exited: > {}", output.1.join("\n> "));
-			return Err(Error::msg("Stream Exited"));
+		match get_stream_output(&rx) {
+			std::result::Result::Ok(d) => {
+				if (d.0 == false) {
+					println!("ft_kalman: stream exited: > {:?}", &d.1);
+					return Err(Error::msg("Stream Exited"));
+				}
+
+				let actual_pos = *d.1.last().unwrap();
+
+				println!("OUT: {:?}, pred: {:?}", &actual_pos, &state.position);
+
+				state.position = actual_pos;
+
+			},
+			Err(l) => {
+				dbg!(&l);
+				return Err(l);
+			}
 		}
 
-		println!("OUT:\n> {}", output.1.join("\n> "));
 
 		sleep(Duration::from_millis(10));
 
