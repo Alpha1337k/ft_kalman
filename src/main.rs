@@ -46,13 +46,13 @@ fn format_payload_item(res: Option<&StreamResult>) -> String {
 	}
 
 
-	return format!("\"[{},{},{}]\"", items[0].to_string(), items[1].to_string(), items[2].to_string());
+	return format!("{},{},{}", items[0].to_string(), items[1].to_string(), items[2].to_string());
 }
 
 fn make_dataset(args: &Args, output: &String) -> anyhow::Result<()> {
 	let mut file = fs::File::create(output)?;
 
-	let headers = ["index", "TIMESTAMP", "TRUE_POSITION", "SPEED", "ACCELERATION", "DIRECTION"].join(",") + "\n";
+	let headers = ["index", "TIMESTAMP", "TRUE_POSITION_X", "TRUE_POSITION_Y", "TRUE_POSITION_Z", "SPEED", "ACCELERATION_X", "ACCELERATION_Y", "ACCELERATION_Z", "DIRECTION_X", "DIRECTION_Y", "DIRECTION_Z"].join(",") + "\n";
 
 	file.write(headers.as_bytes())?;
 
@@ -74,6 +74,13 @@ fn make_dataset(args: &Args, output: &String) -> anyhow::Result<()> {
 	let socket = input::create_connection(4243)?;
 
 	let mut state = State::default();
+
+	state.position = Vec3 {
+		x: 1.8,
+		y: -4.7,
+		z: 0.5
+	};
+
 	initialize_stream(&socket)?;
 
 	output = get_stream_output(&rx)?;
@@ -83,6 +90,8 @@ fn make_dataset(args: &Args, output: &String) -> anyhow::Result<()> {
 	let mut idx: i32 = 0;
 
 	let now = Instant::now();
+
+	let mut timestamp = 0;
 
 	loop {
 		println!("-- {} -- {}", idx, now.elapsed().as_millis());
@@ -117,9 +126,6 @@ fn make_dataset(args: &Args, output: &String) -> anyhow::Result<()> {
 			}
 		}
 
-
-		sleep(Duration::from_millis(9));
-
 		println!("-- -- --");
 
 		let true_pos = items.iter().find(|x| x.payload_type == ResultType::TruePosition);
@@ -130,12 +136,14 @@ fn make_dataset(args: &Args, output: &String) -> anyhow::Result<()> {
 
 		file.write(format!("{},{},{},{},{},{}\n", 
 			&idx,
-			now.elapsed().as_millis(),
+			timestamp,
 			format_payload_item(true_pos),
 			format_payload_item(speed),
 			format_payload_item(accel),
 			format_payload_item(direction),
-		).as_bytes());
+		).as_bytes())?;
+
+		timestamp += 10;
 
 		idx += 1;
 
@@ -155,7 +163,7 @@ fn make_dataset(args: &Args, output: &String) -> anyhow::Result<()> {
 		// 	}
 		// }
 
-		if (idx > 1000) {
+		if (idx > 30_000) {
 			break;
 		}
 	}
@@ -174,18 +182,26 @@ fn run_kalman(args: &Args) -> anyhow::Result<()> {
 
 	let state = State::default();
 
+	let mut reader = csv::Reader::from_path("out.csv")?;
+
+	let mut records = reader.records();
+	let mut i = 0;
+
 	loop {
-		println!("-- -- --");
+		// println!("-- -- --");
 
 		let items = read_input(&socket)?;
 
-		dbg!(&items);
+		state.update_state(&items, );
 
-		state.update_state(&items);
+		let item= records.next().unwrap()?;
 
-		write_data(&socket, state.get_prediction().as_bytes())?;
+		let s = format!("{} {} {}", item[2].to_string(), item[3].to_string(), item[4].to_string());
 
-		println!("-- -- --");
+		write_data(&socket, s.as_bytes())?;
+
+		// println!("-- -- --");
+		i += 1;
 	}
 }
 

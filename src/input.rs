@@ -1,4 +1,4 @@
-use std::{f64, net::UdpSocket};
+use std::{f64, net::UdpSocket, process::exit};
 
 use anyhow::Ok;
 
@@ -8,6 +8,7 @@ pub enum ResultType {
 	Speed,
 	Acceleration,
 	Direction,
+	Position,
 }
 
 #[derive(Debug, Clone)]
@@ -72,8 +73,6 @@ pub fn read_input(socket: &UdpSocket) -> anyhow::Result<Vec<StreamResult>> {
 	
 		let reading: Vec<&str> = received.split('\n').collect();
 
-		// dbg!(reading[0]);
-
 		if idx == 0 && reading[0] != "MSG_START" {
 			panic!("No MSG_START_COMMAND");
 		} else if reading[0] == "MSG_START" {
@@ -92,6 +91,7 @@ pub fn read_input(socket: &UdpSocket) -> anyhow::Result<Vec<StreamResult>> {
 			&"DIRECTION" => ResultType::Direction,
 			&"SPEED" => ResultType::Speed,
 			&"TRUE POSITION" => ResultType::TruePosition,
+			&"POSITION" => ResultType::Position,
 			_ => panic!("Unknown RESULT_TYPE")
 		};
 
@@ -100,7 +100,7 @@ pub fn read_input(socket: &UdpSocket) -> anyhow::Result<Vec<StreamResult>> {
 			.filter_map(|f| f.parse::<f64>().ok())
 			.collect();
 
-		// dbg!(&items);
+			// dbg!(&items);
 
 		results.push(StreamResult { payload_type: result_type, payload_items: items });
 

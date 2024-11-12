@@ -61,7 +61,7 @@ pub fn run_stream(path: &str) -> (Receiver<Result<Vec3, String>>, Sender<String>
 	let (kill_tx, kill_rx) = mpsc::channel::<String>();
 
 	let thd = thread::spawn(move || {
-		let command = cmd!("stdbuf", "-o0", "-e0", "./imu-sensor-stream-linux", "-s", "0", "--delta", "--debug")
+		let command = cmd!("stdbuf", "-o0", "-e0", "./imu-sensor-stream-linux", "-s", "98", "--delta", "--debug")
 			.stdout_capture()
 			.stderr_to_stdout();
 

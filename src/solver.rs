@@ -19,6 +19,8 @@ pub struct State {
 	timestamp: usize
 }
 
+static mut TIMESTAMP: usize = 3000;
+
 impl State {
 	pub fn update_state(self, items: &Vec<StreamResult>) {
 		
@@ -28,6 +30,7 @@ impl State {
 				ResultType::TruePosition => self.update_true_position(&item.payload_items),
 				ResultType::Direction => self.update_direction(&item.payload_items),
 				ResultType::Speed => self.update_speed(&item.payload_items),
+				ResultType::Position => self.update_position(&item.payload_items),
 			}
 		}
 	}
@@ -49,6 +52,14 @@ impl State {
 			x: data[0],
 			y: data[1],
 			z: data[2],
+		}
+	}
+
+	fn update_position(mut self, data: &Vec<f64>) {
+
+		unsafe {
+			println!("{},{},{},{},{}", TIMESTAMP.div_euclid(3000) - 1, TIMESTAMP, data[0], data[1], data[2]);
+			TIMESTAMP += 3000;
 		}
 	}
 
